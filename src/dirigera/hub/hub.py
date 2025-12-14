@@ -17,6 +17,7 @@ from ..devices.controller import Controller, dict_to_controller
 from ..devices.outlet import Outlet, dict_to_outlet
 from ..devices.environment_sensor import EnvironmentSensor, dict_to_environment_sensor
 from ..devices.motion_sensor import MotionSensor, dict_to_motion_sensor
+from ..devices.occupancy_sensor import OccupancySensor, dict_to_occupancy_sensor
 from ..devices.open_close_sensor import OpenCloseSensor, dict_to_open_close_sensor
 from ..devices.scene import Action, Info, Scene, SceneType, Trigger, dict_to_scene
 from ..devices.water_sensor import WaterSensor, dict_to_water_sensor
@@ -247,6 +248,14 @@ class Hub(AbstractSmartHomeHub):
             raise ValueError("Device is not an EnvironmentSensor")
         return dict_to_environment_sensor(environment_sensor, self)
 
+    def get_occupancy_sensors(self) -> List[OccupancySensor]:
+        """
+        TODO Describe
+        """
+        devices = self.get("/devices")
+        sensors = list(filter(lambda x: x["deviceType"] == "occupancySensor", devices))
+        return [dict_to_occupancy_sensor(sensor, self) for sensor in sensors]
+
     def get_motion_sensors(self) -> List[MotionSensor]:
         """
         Fetches all motion sensors registered in the Hub
@@ -440,7 +449,7 @@ class Hub(AbstractSmartHomeHub):
             "triggers": trigger_list,
             "actions": action_list,
         }
-        data = camelize_dict(data)  # type: ignore
+        data: dict[str, Any] = camelize_dict(data)  # type: ignore
         response_dict = self.post(
             "/scenes/",
             data=data,
